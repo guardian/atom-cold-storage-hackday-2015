@@ -28,4 +28,11 @@ object Boot extends App with Logging {
   } else {
     log.info("Skipping web server startup")
   }
+
+  if(startReader) {
+    val readerThread = (new KinesisStreamReader).kinesisThread
+    readerThread.start
+  } else {
+    log.info("Skipping reader startup")
+  }
 }

@@ -11,7 +11,7 @@ libraryDependencies ++= {
   val sprayV = "1.3.3"
   Seq(
     "org.slf4j"         %   "slf4j-simple" % "1.7.13",
-    "com.amazonaws"     %   "amazon-kinesis-client" % "1.2.1",
+    "com.amazonaws"     %   "amazon-kinesis-client" % "1.6.1",
     "com.gu"            %%  "content-atom-model-scala" % "0.2.1-SNAPSHOT",
     "io.spray"          %%  "spray-can"     % sprayV,
     "io.spray"          %%  "spray-routing" % sprayV,
