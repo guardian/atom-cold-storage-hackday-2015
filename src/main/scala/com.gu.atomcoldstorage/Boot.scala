@@ -10,15 +10,15 @@ import scala.concurrent.duration._
 
 object Boot extends App with Logging {
 
-  val startWebServer = args.exists(_ == "web")
-  val startReader    = args.exists(_ == "reader")
+  val startWebServer = !args.exists(_ == "noweb")
+  val startReader    = !args.exists(_ == "noreader")
 
   val port = Option(System.getProperty("coldstorage.port")).map(_.toInt).getOrElse(8080)
 
-  if(startWebServer) {
-    // we need an ActorSystem to host our application in
-    implicit val system = ActorSystem("content-atom-cold-storage")
+  // we need an ActorSystem to host our application in
+  implicit val system = ActorSystem("content-atom-cold-storage")
 
+  if(startWebServer) {
     // create and start our service actor
     val service = system.actorOf(Props[ColdStorageServiceActor], "cold-storage-service")
 
@@ -30,7 +30,8 @@ object Boot extends App with Logging {
   }
 
   if(startReader) {
-    val readerThread = (new KinesisStreamReader).kinesisThread
+    val processorActor = system.actorOf(Props[MessageProcessor], "cold-storage-processor")
+    val readerThread = (new KinesisStreamReader(processorActor)).kinesisThread
     readerThread.start
   } else {
     log.info("Skipping reader startup")
