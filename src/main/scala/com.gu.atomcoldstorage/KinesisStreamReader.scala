@@ -1,5 +1,6 @@
 package com.gu.contentatomcoldstorage
 
+import com.amazonaws.services.kinesis.metrics.interfaces.MetricsLevel
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker
 import java.util.UUID
 
@@ -15,12 +16,12 @@ class KinesisStreamReader(messageProcessor: ActorRef) {
 
   val appName = "content-atom-cold-storage-reader"
 
-  def kinesisConfig = new KinesisClientLibConfiguration(
-    appName,
-    Config.kinesisStreamName,
-    Config.credentialsProvider,
-    appName + UUID.randomUUID().toString
-  ).withRegionName(Config.awsRegion)
+  def kinesisConfig = new KinesisClientLibConfiguration(appName,
+                                                        Config.kinesisStreamName,
+                                                        Config.credentialsProvider,
+                                                        appName + UUID.randomUUID().toString)
+    .withRegionName(Config.awsRegion)
+    .withMetricsLevel(MetricsLevel.NONE)
 
   class RecordProcessor extends IRecordProcessor {
     def initialize(input: InitializationInput) = ()
