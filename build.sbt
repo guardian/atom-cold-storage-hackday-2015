@@ -14,6 +14,7 @@ libraryDependencies ++= {
   Seq(
     "org.json4s"         %% "json4s-core"    % "3.2.11",
     "org.json4s"         %% "json4s-jackson" % "3.2.11",
+    "org.json4s"         %% "json4s-ext"     % "3.2.11",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.twitter"        %% "scrooge-core" % "3.17.0",
     "org.slf4j"          %   "slf4j-simple" % "1.7.13",

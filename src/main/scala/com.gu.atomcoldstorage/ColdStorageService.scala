@@ -7,15 +7,16 @@ import spray.routing._
 import spray.http._
 import MediaTypes._
 import org.json4s.jackson.Serialization
-import org.json4s.{ DefaultFormats, Formats }
-import org.json4s.JsonAST.JValue
+import org.json4s.{ DefaultFormats, Formats, FieldSerializer }
+import org.json4s.JsonAST._
+import org.joda.time.DateTime
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
 class ColdStorageServiceActor(val store: AtomReadStore)
     extends Actor with ColdStorageService {
 
-  val formats: Formats = DefaultFormats
+  val formats: Formats = DefaultFormats + AtomSummary.dateSerializer
 
   implicit val ec = context.dispatcher
 
@@ -26,9 +27,26 @@ class ColdStorageServiceActor(val store: AtomReadStore)
   // this actor only runs our route, but you could add
   // other things here, like request stream processing
   // or timeout handling
+  //def receive = runRoute(healthCheck ~ listAtoms ~ getAtom)
   def receive = runRoute(healthCheck ~ getAtom ~ listAtoms)
 }
 
+
+case class AtomSummary(
+  id: String,
+  atomType: String,
+  dateOfUpdate: DateTime,
+  lastModified: Option[JValue] = None,
+  createdDate: Option[JValue]  = None
+)
+
+object AtomSummary {
+  val dateSerializer = FieldSerializer[AtomSummary](
+    serializer = {
+      case (fieldName, d: DateTime) => Some(fieldName -> d.getMillis)
+    }
+  )
+}
 
 // this trait defines our service behavior independently from the service actor
 trait ColdStorageService extends HttpService {
@@ -63,7 +81,24 @@ trait ColdStorageService extends HttpService {
     }
 
   val listAtoms =
-    path("atoms".r) { _ => get(asJsonSuccess(store.list())) }
+    path("atoms".r) { _ =>
+      get {
+        val summary = store.list().map { items =>
+          items.map { item =>
+            def dateField(fname: String) =
+              (item.jsonData \ "contentChangeDetails" \ fname \ "date").toOption
+
+            AtomSummary(item.id,
+                        item.atomType,
+                        item.dateOfUpdate,
+                        dateField("lastModified"),
+                        dateField("created")
+            )
+          }
+        }
+        asJsonSuccess(summary)
+      }
+    }
 
   def asJson(a: AnyRef) =
     respondWithMediaType(`application/json`) {
