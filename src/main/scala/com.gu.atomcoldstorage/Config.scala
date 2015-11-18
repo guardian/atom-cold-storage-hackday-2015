@@ -22,4 +22,6 @@ object Config {
     new InstanceProfileCredentialsProvider()
   )
 
+  lazy val stage = conf.getString("stage")
+
 }

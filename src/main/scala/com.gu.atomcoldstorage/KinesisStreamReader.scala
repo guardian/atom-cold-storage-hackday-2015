@@ -14,7 +14,7 @@ import com.amazonaws.services.kinesis.clientlibrary.types.{ InitializationInput,
 
 class KinesisStreamReader(messageProcessor: ActorRef) extends Logging {
 
-  val appName = "content-atom-cold-storage-reader"
+  val appName = "content-atom-cold-storage-reader-" + Config.stage
 
   log.info(s"Kinesis stream name: ${Config.kinesisStreamName}")
 
