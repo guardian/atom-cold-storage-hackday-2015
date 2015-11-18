@@ -53,7 +53,14 @@ trait ColdStorageService extends HttpService {
     }
 
   val getAtom =
-    path("atom" / "([A-Za-z0-9-]+)".r) { id => get(asJsonSuccess(store.get(id))) }
+    path("atom" / "([A-Za-z0-9-]+)".r) { id =>
+      get {
+        onSuccess(store.get(id)) {
+          case Some(atom) => asJson(atom)
+          case None => respondWithStatus(404)(complete(s"Not found $id"))
+        }
+      }
+    }
 
   val listAtoms =
     path("atoms".r) { _ => get(asJsonSuccess(store.list())) }
