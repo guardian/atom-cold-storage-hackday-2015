@@ -10,12 +10,15 @@ libraryDependencies ++= {
   val akkaV = "2.3.9"
   val sprayV = "1.3.3"
   Seq(
+    "org.json4s"         %% "json4s-core"    % "3.2.11",
     "org.json4s"         %% "json4s-jackson" % "3.2.11",
     "org.apache.commons" % "commons-io" % "1.3.2",
     "com.twitter"        %% "scrooge-core" % "3.17.0",
     "org.slf4j"          %   "slf4j-simple" % "1.7.13",
     "com.amazonaws"      %   "amazon-kinesis-client" % "1.6.1",
+    "com.amazonaws"      %   "aws-java-sdk" % "1.5.7",
     "com.gu"             %%  "content-atom-model-scala" % "0.2.1-SNAPSHOT",
+    "com.twitter"	     %%  "storehaus-dynamodb" % "0.12.0",
     "io.spray"           %%  "spray-can"     % sprayV,
     "io.spray"           %%  "spray-routing" % sprayV,
     "io.spray"           %%  "spray-testkit" % sprayV  % "test",

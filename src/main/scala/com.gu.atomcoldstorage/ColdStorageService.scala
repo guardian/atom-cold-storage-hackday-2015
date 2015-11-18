@@ -1,13 +1,22 @@
 package com.gu.contentatomcoldstorage
 
+import scala.util.{ Success, Failure }
+import scala.concurrent.ExecutionContext
 import akka.actor.Actor
 import spray.routing._
 import spray.http._
 import MediaTypes._
+import org.json4s.jackson.Serialization
+import org.json4s.{ DefaultFormats, Formats }
 
 // we don't implement our route structure directly in the service actor because
 // we want to be able to test it independently, without having to spin up an actor
-class ColdStorageServiceActor extends Actor with ColdStorageService {
+class ColdStorageServiceActor(val store: AtomReadStore)
+    extends Actor with ColdStorageService {
+
+  val formats: Formats = DefaultFormats
+
+  implicit val ec = context.dispatcher
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -16,12 +25,17 @@ class ColdStorageServiceActor extends Actor with ColdStorageService {
   // this actor only runs our route, but you could add
   // other things here, like request stream processing
   // or timeout handling
-  def receive = runRoute(healthCheck)
+  def receive = runRoute(healthCheck ~ getAtom)
 }
 
 
 // this trait defines our service behavior independently from the service actor
 trait ColdStorageService extends HttpService {
+  implicit val ec: ExecutionContext
+  implicit val formats: Formats
+
+  val store: AtomReadStore
+
   val healthCheck =
     path("") {
       get {
@@ -33,6 +47,20 @@ trait ColdStorageService extends HttpService {
               </body>
             </html>
           }
+        }
+      }
+    }
+
+  val getAtom =
+    path("atom" / "([A-Za-z0-9-]+)".r) { id =>
+      get {
+        onComplete(store.get(id)) {
+          case Success(Some(atom)) =>
+            respondWithMediaType(`application/json`) {
+              complete(Serialization.write(atom))
+            }
+          case Success(None) => respondWithStatus(404)(complete(s"$id not found"))
+          case Failure(ex)   => complete(s"An error occurred: ${ex.getMessage}")
         }
       }
     }
