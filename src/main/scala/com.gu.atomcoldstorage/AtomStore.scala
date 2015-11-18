@@ -15,6 +15,7 @@ case class ContentAtomItem(
 
 trait AtomReadStore {
   def get(id: String): Future[Option[ContentAtomItem]]
+  def list(page: Int = 0, pgsz: Int = 10): Future[List[ContentAtomItem]]
 }
 
 trait AtomWriteStore {
@@ -34,6 +35,11 @@ class AtomMapStore extends AtomStore {
   private val contents: Map[String, ContentAtomItem] = Map(
     "1234" -> ContentAtomItem("1234", DateTime.now, "test", JObject(), None)
   )
+
+  def list(page: Int = 0, pgsz: Int = 10): Future[List[ContentAtomItem]] = {
+    val l = contents.values.toList
+    Future.successful(l)
+  }
 
   def put(atom: ContentAtomItem): Future[Unit] = {
     contents.put(atom.id, atom)

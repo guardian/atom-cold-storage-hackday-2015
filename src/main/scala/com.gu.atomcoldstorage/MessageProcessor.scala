@@ -21,6 +21,7 @@ class MessageProcessor(store: AtomStore)
     val buffer = record.getData
     deserializeEvent(buffer) match {
       case Success(e)   => {
+        log.info(s"Storing ${e.atom.id}")
         val item = ContentAtomItem(
           id = e.atom.id,
           dateOfUpdate = DateTime.now,

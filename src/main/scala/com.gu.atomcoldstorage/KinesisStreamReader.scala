@@ -12,9 +12,11 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibC
 
 import com.amazonaws.services.kinesis.clientlibrary.types.{ InitializationInput, ShutdownInput, ProcessRecordsInput }
 
-class KinesisStreamReader(messageProcessor: ActorRef) {
+class KinesisStreamReader(messageProcessor: ActorRef) extends Logging {
 
   val appName = "content-atom-cold-storage-reader"
+
+  log.info(s"Kinesis stream name: ${Config.kinesisStreamName}")
 
   def kinesisConfig = new KinesisClientLibConfiguration(appName,
                                                         Config.kinesisStreamName,
@@ -46,14 +48,5 @@ class KinesisStreamReader(messageProcessor: ActorRef) {
   }
 
   def kinesisThread = new Thread(kinesisWorker)
-
-  //private lazy val kinesis = new AmazonKinesisClient
-
-//   private def getRecords = {
-//     val req =
-// //kinesis.getRecords(x$1: GetRecordsRequest)
-//   }
-
-// lazy val worker = new Worker(
 
 }
